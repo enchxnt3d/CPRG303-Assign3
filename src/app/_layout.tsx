@@ -18,8 +18,24 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Forms App" }} />
-      <Stack.Screen name="sign-in" options={{ title: "Sign In" }} />
-      <Stack.Screen name="sign-up" options={{ title: "Sign Up" }} />
+
+      {/* Authentication screens already have their own titles */}
+      <Stack.Screen
+        name="sign-in"
+        options={{
+          title: "Sign In",
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="sign-up"
+        options={{
+          title: "Sign Up",
+          headerShown: false,
+        }}
+      />
+
       <Stack.Screen
         name="employee"
         options={{ title: "Employee Information" }}
