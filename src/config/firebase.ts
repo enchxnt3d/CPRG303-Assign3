@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Firebase connection for Sacbé
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "cprg303-sacbe-firebase.firebaseapp.com",
-  projectId: "cprg303-sacbe-firebase",
-  storageBucket: "cprg303-sacbe-firebase.firebasestorage.app",
-  messagingSenderId: "489364353453",
-  appId: "1:489364353453:web:...",
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Prevent Firebase from initializing twice during Expo reloads
