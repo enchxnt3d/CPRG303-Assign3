@@ -1,4 +1,6 @@
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { FirebaseError } from "firebase/app";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { Formik } from "formik";
 import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
@@ -14,33 +16,15 @@ import {
 } from "react-native";
 import * as Yup from "yup";
 
+import { auth } from "../config/firebase";
+import { colors, spacing } from "../constants/theme";
+
 interface SignInValues {
   email: string;
   password: string;
 }
 
 type FocusedField = "email" | "password" | null;
-
-// Colours requested by the group
-const colors = {
-  background: "#F4F7FB",
-  card: "#FFFFFF",
-  primary: "#2563EB",
-  primaryDark: "#1D4ED8",
-  text: "#111827",
-  muted: "#6B7280",
-  border: "#D1D5DB",
-  error: "#DC2626",
-  success: "#16A34A",
-  disabled: "#9CA3AF",
-};
-
-const spacing = {
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-};
 
 // Rules for the sign in form
 const signInSchema = Yup.object().shape({
@@ -54,20 +38,56 @@ const signInSchema = Yup.object().shape({
     .required("Password is required"),
 });
 
+function getFirebaseSignInErrorMessage(error: unknown) {
+  if (error instanceof FirebaseError) {
+    if (
+      error.code === "auth/invalid-credential" ||
+      error.code === "auth/wrong-password" ||
+      error.code === "auth/user-not-found"
+    ) {
+      return "Incorrect email or password.";
+    }
+
+    if (error.code === "auth/invalid-email") {
+      return "Please enter a valid email address.";
+    }
+
+    if (error.code === "auth/too-many-requests") {
+      return "Too many attempts. Please wait a bit and try again.";
+    }
+
+    if (error.code === "auth/network-request-failed") {
+      return "Network error. Check your internet and try again.";
+    }
+  }
+
+  return "The account could not be signed in. Please try again.";
+}
+
 export default function SignInScreen() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<FocusedField>(null);
 
-  const handleSignIn = (values: SignInValues) => {
+  const handleSignIn = async (values: SignInValues) => {
     setIsLoading(true);
 
-    // Fake request for now, just to show the form works
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const cleanEmail = values.email.trim();
 
-      Alert.alert("Sign in successful", `Welcome back, ${values.email}`);
-    }, 1000);
+      await signInWithEmailAndPassword(auth, cleanEmail, values.password);
+
+      Alert.alert("Sign in successful", "Welcome back to Sacbé.");
+
+      // After login, send the user to the protected app area
+      router.replace("/employee");
+    } catch (error) {
+      Alert.alert("Sign in failed", getFirebaseSignInErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
