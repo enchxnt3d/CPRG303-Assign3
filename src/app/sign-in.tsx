@@ -82,7 +82,7 @@ export default function SignInScreen() {
       Alert.alert("Sign in successful", "Welcome back to Sacbé.");
 
       // After login, send the user to the protected app area
-      router.replace("/employee");
+      router.replace("/");
     } catch (error) {
       Alert.alert("Sign in failed", getFirebaseSignInErrorMessage(error));
     } finally {
