@@ -1,4 +1,6 @@
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { FirebaseError } from "firebase/app";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { Formik } from "formik";
 import { Eye, EyeOff } from "lucide-react-native";
 import { useState } from "react";
@@ -13,6 +15,8 @@ import {
   View,
 } from "react-native";
 import * as Yup from "yup";
+
+import { auth } from "../config/firebase";
 import { colors, spacing } from "../constants/theme";
 
 interface SignUpValues {
@@ -52,7 +56,31 @@ const signUpSchema = Yup.object().shape({
     .required("Confirm password is required"),
 });
 
+function getFirebaseSignUpErrorMessage(error: unknown) {
+  if (error instanceof FirebaseError) {
+    if (error.code === "auth/email-already-in-use") {
+      return "This email is already connected to an account.";
+    }
+
+    if (error.code === "auth/invalid-email") {
+      return "Please enter a valid email address.";
+    }
+
+    if (error.code === "auth/weak-password") {
+      return "Password is too weak. Use at least 8 characters.";
+    }
+
+    if (error.code === "auth/network-request-failed") {
+      return "Network error. Check your internet and try again.";
+    }
+  }
+
+  return "The account could not be created. Please try again.";
+}
+
 export default function SignUpScreen() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -61,15 +89,33 @@ export default function SignUpScreen() {
 
   const [focusedField, setFocusedField] = useState<FocusedField>(null);
 
-  const handleSignUp = (values: SignUpValues) => {
+  const handleSignUp = async (values: SignUpValues) => {
     setIsLoading(true);
 
-    // Fake request for now, just to show the form works
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const cleanFullName = values.fullName.trim();
+      const cleanEmail = values.email.trim();
 
-      Alert.alert("Account created", `Welcome to Sacbé, ${values.fullName}`);
-    }, 1000);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        cleanEmail,
+        values.password,
+      );
+
+      // Firebase creates the account first, then we save the user's name
+      await updateProfile(userCredential.user, {
+        displayName: cleanFullName,
+      });
+
+      Alert.alert("Account created", `Welcome to Sacbé, ${cleanFullName}`);
+
+      // Send the user to Sign In so we can test the full auth flow
+      router.replace("/sign-in");
+    } catch (error) {
+      Alert.alert("Sign up failed", getFirebaseSignUpErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
