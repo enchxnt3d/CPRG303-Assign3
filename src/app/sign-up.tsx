@@ -110,7 +110,7 @@ export default function SignUpScreen() {
       Alert.alert("Account created", `Welcome to Sacbé, ${cleanFullName}`);
 
       // Send the user to Sign In so we can test the full auth flow
-      router.replace("/sign-in");
+      router.replace("/");
     } catch (error) {
       Alert.alert("Sign up failed", getFirebaseSignUpErrorMessage(error));
     } finally {
