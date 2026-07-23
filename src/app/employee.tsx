@@ -118,7 +118,7 @@ export default function Employee() {
         phone: values.phone.trim(),
         department: values.department.trim(),
 
-        // This connects the employee record to the logged-in user
+        // This connects each employee record to the logged-in user
         userId: currentUser.uid,
         userEmail: currentUser.email,
 
@@ -260,6 +260,13 @@ export default function Employee() {
               disabled={!isValid || !dirty || isSubmitting}
             />
 
+            <View style={styles.viewListContainer}>
+              <FormButton
+                title="View Saved Employees"
+                onPress={() => router.push("/employees-list" as never)}
+              />
+            </View>
+
             <View style={styles.signOutContainer}>
               <FormButton title="Sign Out" onPress={handleSignOut} />
             </View>
@@ -306,6 +313,10 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 14,
     marginBottom: 25,
+  },
+
+  viewListContainer: {
+    marginTop: 16,
   },
 
   signOutContainer: {
